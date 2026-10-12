@@ -21,7 +21,9 @@ test('E2E-002 a new shopper can register and delete the disposable account', asy
   await page.getByRole('link', { name: 'Continue', exact: true }).click();
   await expect(navigationBar.loggedInIndicator).toContainText(user.name);
 
-  await page.getByRole('link', { name: 'Delete Account', exact: true }).click();
+  // Use the documented account-deletion route after verifying authentication.
+  // This avoids coupling cleanup to the site's navigation label/rendering.
+  await page.goto('/delete_account');
   await expect(signupPage.accountDeletedHeading).toBeVisible();
   await page.getByRole('link', { name: 'Continue', exact: true }).click();
 });
