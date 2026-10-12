@@ -10,7 +10,7 @@
   "scripts": {
     "test": "playwright test",
     "test:smoke": "playwright test tests/smoke",
-    "test:regression": "playwright test tests/navigation tests/authentication tests/products tests/cart tests/contact tests/subscription tests/e2e",
+    "test:regression": "playwright test tests/sanity tests/navigation tests/authentication tests/products tests/cart tests/contact tests/subscription tests/e2e",
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",
     "test:ui": "playwright test --ui",
@@ -27,7 +27,11 @@
     "clean:reports": "node scripts/clean-reports.js",
     "validate:config": "node scripts/validate-config.js",
     "test:e2e": "playwright test tests/e2e",
-    "test:all": "npm run validate:config && npm run lint && npm run format:check && npm test && npm run test:bdd"
+    "test:all": "npm run validate:config && npm run lint && npm run format:check && npm test && npm run test:bdd",
+    "test:sanity": "playwright test tests/sanity",
+    "test:cross-browser": "playwright test --project=chromium --project=firefox --project=webkit",
+    "test:responsive": "playwright test --project=mobile-chromium",
+    "test:full": "npm run validate:config && npm run lint && npm run format:check && npm test && npm run test:bdd"
   },
   "devDependencies": {
     "@cucumber/cucumber": "11.3.0",
