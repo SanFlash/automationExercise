@@ -1,92 +1,83 @@
 # Automation Exercise — Playwright JavaScript Framework
 
-A maintainable end-to-end automation framework for the public [Automation Exercise](https://www.automationexercise.com/) practice site. It combines Playwright Test, page objects, centralized locator factories, custom fixtures, Cucumber.js BDD, documented API tests, reporting, and GitHub Actions.
+A maintainable end-to-end automation framework for the public [Automation Exercise](https://www.automationexercise.com/) practice site. The project is designed around Playwright Test, page objects, centralized locator factories, custom fixtures, Cucumber.js BDD, API checks grounded in published documentation, reports, and GitHub Actions.
 
-> **Status:** framework baseline is being established. Test coverage is not a claim that every public-site scenario has passed; verify with the commands below and inspect CI artifacts for the actual result.
+> **Delivery status:** repository bootstrap is in progress. The README describes the intended framework scope; do not treat listed test coverage as execution evidence. Tests must be installed and run before any result can be called passing.
 
 ## Quick start
 
-- Node.js 20 or newer
-- Install dependencies: `npm ci`
-- Install browser: `npx playwright install --with-deps chromium`
-- Copy `.env.example` to `.env` if you need to override defaults.
-- Run the small smoke suite: `npm run test:smoke`
-- Run API checks: `npm run test:api`
-- Run BDD: `npm run test:bdd`
-- Open the HTML report: `npm run report`
+- Node.js 20 or newer.
+- Install dependencies: `npm ci`.
+- Install a browser: `npx playwright install --with-deps chromium`.
+- Copy `.env.example` to `.env` to override defaults.
+- Run the smoke suite: `npm run test:smoke`.
+- Run public API checks: `npm run test:api`.
+- Run BDD scenarios: `npm run test:bdd`.
+- Open a generated HTML report: `npm run report` (after a Playwright run).
 
 ## Architecture
 
 ```mermaid
 flowchart TD
-  A[playwright.config.js / environment] --> B[Playwright Test]
+  A[Configuration] --> B[Playwright Test]
   B --> C[Custom fixtures]
   C --> D[Page objects / reusable flows]
   D --> E[Centralized locators and components]
-  E --> F[Automation Exercise UI]
-  B --> G[Assertions, screenshots, traces]
+  E --> F[Automation Exercise website]
+  B --> G[Assertions and evidence]
   G --> H[HTML, JSON and JUnit reports]
-  I[Cucumber Gherkin] --> J[World and hooks]
+  I[Cucumber feature files] --> J[World and hooks]
   J --> D
-  K[Playwright APIRequestContext tests] --> L[Documented public API endpoints]
+  K[Playwright API tests] --> L[Documented practice endpoints]
   H --> M[GitHub Actions artifacts]
 ```
 
-## Project structure
+## Major layers
 
-- `config/` — environment and framework settings
-- `fixtures/` — composable Playwright page-object fixtures
-- `pages/`, `locators/`, `components/` — separation of UI behavior and selectors
-- `flows/` — reusable multi-page user journeys
-- `tests/` — smoke, navigation, products, cart, forms, API and regression checks
-- `bdd/` — Cucumber features, step definitions, World and hooks
-- `data/`, `utils/` — generated test data and utilities
-- `docs/` — architecture, setup, troubleshooting, CI and learning roadmap
-- `.github/workflows/` — PR smoke validation and scheduled/regression workflow definitions
+- `config/`: environment, timeout and browser settings.
+- `fixtures/`: composition of page objects over Playwright's isolated page fixture.
+- `pages/`, `locators/`, `components/`: behavior, selectors and reusable UI components kept separate.
+- `flows/`: multi-page journeys that orchestrate page objects.
+- `tests/`: UI smoke/regression and documented API scenarios.
+- `bdd/`: Gherkin, step definitions, Cucumber World and hooks; executed independently from Playwright Test.
+- `data/`, `utils/`: data factories and focused helpers.
+- `docs/`: architecture, installation, debugging, reporting, CI and learning resources.
+- `.github/workflows/`: workflow definitions for validation and regression.
 
-## Core commands
+## Useful commands
 
 | Command | Purpose |
 |---|---|
 | `npm test` | Full Playwright suite |
-| `npm run test:smoke` | Fast smoke suite |
+| `npm run test:smoke` | Smoke suite |
 | `npm run test:regression` | Broader regression suite |
-| `npm run test:headed` | Headed browser run |
-| `npm run test:debug` | Playwright Inspector debug mode |
+| `npm run test:headed` | Headed browser execution |
+| `npm run test:debug` | Inspector debugging |
 | `npm run test:ui` | Playwright UI mode |
 | `npm run test:chromium` | Chromium project |
 | `npm run test:firefox` | Firefox project |
 | `npm run test:webkit` | WebKit project |
-| `npm run test:api` | Public API checks based on the site's published API list |
-| `npm run test:bdd` | Cucumber scenarios |
+| `npm run test:api` | Publicly documented API checks |
+| `npm run test:bdd` | Cucumber suite |
 | `npm run test:bdd:smoke` | Smoke-tagged BDD scenarios |
 | `npm run lint` | ESLint |
-| `npm run format` | Prettier formatting |
-| `npm run report` | Open Playwright HTML report |
-| `npm run clean:reports` | Remove generated reports and test artifacts |
-| `npm run validate:config` | Validate framework environment/configuration |
+| `npm run format:check` | Prettier check |
+| `npm run report` | Open generated HTML report |
+| `npm run clean:reports` | Remove generated artifacts only |
+| `npm run validate:config` | Validate framework configuration |
 
 ## Learning path
 
-1. Start with `tests/smoke/home-page.spec.js`.
-2. Follow `fixtures/README.md` to understand fixture lifecycle.
-3. Read `docs/fixtures-and-locators.md` and inspect `locators/`.
-4. Read `docs/page-object-model.md` and compare a test with its page object.
-5. Explore `flows/README.md` for multi-page flows.
-6. Try the equivalent user story under `bdd/features/`.
-7. Read `docs/reporting.md` to use traces and test reports.
-8. Read `docs/ci-cd.md` before enabling workflows on your repository.
+Begin at `tests/smoke/home-page.spec.js`, then read `fixtures/README.md`, `docs/fixtures-and-locators.md`, and `docs/page-object-model.md`. Compare the same behavior in `bdd/features/`, learn to inspect the trace using `docs/debugging.md`, then explore `docs/reporting.md` and `docs/ci-cd.md`.
 
-## Responsible test data
+## Responsible public-site testing
 
-The site is shared public practice infrastructure. Keep runs bounded, use generated unique email addresses where account creation is tested, avoid high-volume parallel account creation, use dummy checkout data only, and never commit `.env`, credentials, storage state, or generated report artifacts containing sensitive data.
+Automation Exercise is shared practice infrastructure. Use bounded runs, unique emails for any account-creation tests, low concurrency for stateful workflows, and dummy checkout data only. Do not commit credentials, `.env`, storage state, or generated artifacts containing sensitive data.
 
 ## API basis
 
-API coverage should follow the published [Automation Exercise API list](https://www.automationexercise.com/api_list). Do not infer undocumented contracts. Public demo behavior may change; inspect the CI run and report before treating results as current.
+API scenarios must follow the site's [published API list](https://www.automationexercise.com/api_list), rather than guessed contracts. The public site can change; inspect the actual run report and response payloads before classifying a failure.
 
-## CI
+## CI/CD
 
-GitHub Actions runs install, lint, and smoke validation on pull requests and provides a scheduled/manual regression path. Reports and failure evidence are uploaded as workflow artifacts. A green workflow is evidence only for the scenarios executed in that run, not proof that every possible user journey works.
-
-See `docs/installation.md`, `docs/test-strategy.md`, `docs/debugging.md`, `docs/reporting.md`, and `docs/troubleshooting.md` for details.
+Workflows are intended to install dependencies, validate/lint the project, run suites, and upload reports as artifacts even on failure. A workflow should be described as passing only after GitHub Actions shows a successful completed run. A green run applies only to the scenarios and environment used by that execution.
