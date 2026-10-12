@@ -1,0 +1,90 @@
+name: Manual test suite runner
+
+on:
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: Select the suite to execute
+        required: true
+        type: choice
+        default: sanity
+        options:
+          - smoke
+          - sanity
+          - regression
+          - e2e
+          - api
+          - bdd
+          - full
+      browser:
+        description: Browser project for UI suites
+        required: true
+        type: choice
+        default: chromium
+        options:
+          - chromium
+          - firefox
+          - webkit
+      base_url:
+        description: Optional target UI URL (leave blank for the default practice site)
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  run-selected-suite:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm install
+      - name: Install selected browser
+        if: inputs.suite != 'api' && inputs.suite != 'bdd'
+        run: npx playwright install --with-deps ${{ inputs.browser }}
+      - name: Validate configuration
+        run: npm run validate:config
+        env:
+          BASE_URL: ${{ inputs.base_url }}
+      - name: Run selected suite
+        env:
+          BASE_URL: ${{ inputs.base_url }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          case "${{ inputs.suite }}" in
+            smoke) npm run test:smoke -- --project="${{ inputs.browser }}" ;;
+            sanity) npm run test:sanity -- --project="${{ inputs.browser }}" ;;
+            regression) npm run test:regression -- --project="${{ inputs.browser }}" ;;
+            e2e) npm run test:e2e -- --project="${{ inputs.browser }}" ;;
+            api) npm run test:api -- --project=chromium ;;
+            bdd)
+              npx playwright install --with-deps chromium
+              npm run test:bdd
+              ;;
+            full)
+              npm run test:smoke -- --project="${{ inputs.browser }}"
+              npm run test:sanity -- --project="${{ inputs.browser }}"
+              npm run test:regression -- --project="${{ inputs.browser }}"
+              npm run test:api -- --project=chromium
+              npx playwright install --with-deps chromium
+              npm run test:bdd
+              ;;
+            *) echo "Unsupported suite"; exit 2 ;;
+          esac
+      - name: Upload reports and evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: manual-${{ inputs.suite }}-${{ inputs.browser }}-${{ github.run_id }}
+          path: |
+            reports/
+            test-results/
+          if-no-files-found: warn
+          retention-days: 14
