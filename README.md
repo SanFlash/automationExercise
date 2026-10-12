@@ -16,11 +16,12 @@
 The GitHub Actions workflow runs the configured UI regression suite, API contract tests, and Cucumber BDD suite. It generates an interactive, GSAP-animated HTML dashboard with test counts, pass rate, duration, retry indicators, searchable test results, source paths, and failure messages. The report includes creator attribution for **Satyendra Kumar Namdeo**.
 
 - **After each run:** open the workflow run and download the `animated-playwright-report` artifact. The workflow summary contains a clickable link to the run and report artifact location.
-- **Main-branch push:** the workflow also attempts to publish the latest dashboard through GitHub Pages at `https://sanflash.github.io/automationExercise/`. GitHub Pages must be enabled for the repository with **GitHub Actions** as the build/deployment source. If Pages is not enabled or deployment permissions are unavailable, use the downloadable workflow artifact instead.
+- **Automatic CI:** the primary workflow runs on every branch push, pull request, and manual dispatch. It validates configuration, linting/formatting, Chromium UI regression, API contracts, and Cucumber BDD, then uploads the animated dashboard and available evidence even when a test suite fails.
+- **Nightly regression:** the scheduled workflow runs every day at 03:17 UTC (08:47 India Standard Time), with Chromium, Firefox, and WebKit UI regression plus API and BDD jobs. Open the run summary and download its evidence artifacts. GitHub scheduled jobs can occasionally start late during platform load.
 - **Local generation:** after running Playwright, execute `npm run report:dashboard`; the dashboard is written to `reports/dashboard/index.html`. Open that HTML file in a browser. GSAP animation is loaded from a CDN, so animation requires network access; the report data and dashboard remain useful without GSAP.
 - **Evidence:** screenshots, videos, traces, Playwright HTML reports, JSON/JUnit results are attached to the workflow artifact when generated. Evidence files may contain test data; do not use real credentials or sensitive production data.
 
-The report cannot automatically launch a browser on your personal computer from a GitHub-hosted runner. Instead, the workflow publishes clickable links in the Actions summary and, when configured, deploys a hosted dashboard URL.
+The report cannot automatically launch a browser on your personal computer from a GitHub-hosted runner. Instead, the workflow publishes clickable links in the Actions summary and makes the dashboard available as a downloadable artifact.
 
 ## Project status and honest coverage statement
 
