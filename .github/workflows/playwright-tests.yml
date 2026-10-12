@@ -1,4 +1,4 @@
-name: Playwright smoke validation
+name: Playwright UI and E2E validation
 
 on:
   pull_request:
@@ -25,6 +25,7 @@ jobs:
       - run: npm run format
       - run: npm run format:check
       - run: npm run test:smoke -- --project=chromium
+      - run: npm run test:e2e -- --project=chromium
       - name: Upload test artifacts
         if: always()
         uses: actions/upload-artifact@v4
