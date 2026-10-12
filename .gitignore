@@ -1,0 +1,15 @@
+node_modules/
+.env
+.env.*
+!.env.example
+playwright-report/
+reports/*
+!reports/.gitkeep
+test-results/*
+!test-results/.gitkeep
+coverage/
+.nyc_output/
+.DS_Store
+*.log
+playwright/.auth/
+storage-state*.json
