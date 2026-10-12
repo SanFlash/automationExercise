@@ -52,10 +52,16 @@ jobs:
         id: ui
         continue-on-error: true
         run: npm run test:regression
+      - name: Preserve UI suite results
+        if: always()
+        run: if [ -f reports/results.json ]; then cp reports/results.json reports/ui-results.json; fi
       - name: Run API contract suite
         id: api
         continue-on-error: true
         run: npm run test:api -- --project=chromium
+      - name: Preserve API suite results
+        if: always()
+        run: if [ -f reports/results.json ]; then cp reports/results.json reports/api-results.json; fi
       - name: Run Cucumber BDD suite
         id: bdd
         continue-on-error: true
@@ -94,6 +100,8 @@ jobs:
             reports/dashboard/
             reports/html/
             reports/results.json
+            reports/ui-results.json
+            reports/api-results.json
             reports/junit.xml
             reports/cucumber-results.json
             test-results/
@@ -117,6 +125,7 @@ jobs:
           path: public
       - name: Deploy animated report to GitHub Pages
         if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        continue-on-error: true
         uses: actions/deploy-pages@v4
       - name: Fail workflow if any test suite failed
         if: always()
