@@ -1,0 +1,1 @@
+export default { default: { paths: ['bdd/features/**/*.feature'], import: ['bdd/support/**/*.js', 'bdd/step-definitions/**/*.js'], format: ['progress', 'json:reports/cucumber-results.json'], publishQuiet: true, parallel: 1 } };
