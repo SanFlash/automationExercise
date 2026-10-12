@@ -92,7 +92,7 @@ jobs:
             echo "- [Open this workflow run and download the **Animated HTML Report** artifact](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID})"
             echo "- [Open the latest published dashboard](https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/)"
             echo ""
-            echo "The dashboard is published on main-branch pushes when GitHub Pages is enabled for this repository. Pull requests can download the run artifact."
+            echo "GitHub Pages publishing is optional and may be unavailable until enabled in repository Settings → Pages. The downloadable animated report artifact is the reliable fallback for every run."
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Upload animated dashboard and test evidence
         if: always()
@@ -118,15 +118,17 @@ jobs:
           if [ -d reports/html ]; then cp -R reports/html public/playwright-html; fi
           if [ -d test-results ]; then cp -R test-results public/evidence; fi
           if [ ! -f public/index.html ]; then printf '<h1>Report unavailable</h1><p>No Playwright JSON report was generated.</p>' > public/index.html; fi
-      - name: Configure GitHub Pages
+      - name: Configure GitHub Pages (optional)
         if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        continue-on-error: true
         uses: actions/configure-pages@v5
-      - name: Upload Pages artifact
+      - name: Upload Pages artifact (optional)
         if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        continue-on-error: true
         uses: actions/upload-pages-artifact@v3
         with:
           path: public
-      - name: Deploy animated report to GitHub Pages
+      - name: Deploy animated report to GitHub Pages (optional)
         if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
         continue-on-error: true
         uses: actions/deploy-pages@v4
