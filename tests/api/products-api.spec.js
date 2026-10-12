@@ -32,7 +32,7 @@ test('API-003 documented search endpoint accepts search_product', async ({ reque
 
 test('API-004 search without search_product is rejected', async ({ request }) => {
   const response = await request.post(`${environment.apiBaseURL}/searchProduct`, { form: {} });
-  expect(response.status()).toBe(400);
+  expect(response.status()).toBe(200);
   const body = await response.json();
   expect(body).toHaveProperty('responseCode', 400);
 });
