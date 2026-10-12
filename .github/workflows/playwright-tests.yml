@@ -1,4 +1,4 @@
-name: Playwright UI and E2E validation
+name: Playwright quality and UI validation
 
 on:
   pull_request:
@@ -9,28 +9,65 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: playwright-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  smoke:
+  quality:
+    name: Static quality gates
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - run: npm install
-      - run: npx playwright install --with-deps chromium
-      - run: npm run validate:config
-      - run: npm run lint
-      - run: npm run format
-      - run: npm run format:check
-      - run: npm run test:smoke -- --project=chromium
-      - run: npm run test:e2e -- --project=chromium
-      - name: Upload test artifacts
+          cache: npm
+      - name: Install dependencies
+        run: npm install
+      - name: Validate configuration
+        run: npm run validate:config
+      - name: ESLint
+        run: npm run lint
+      - name: Apply canonical formatting
+        run: npm run format
+      - name: Verify formatting
+        run: npm run format:check
+
+  chromium-critical-path:
+    name: Chromium smoke, sanity and E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm install
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Validate configuration
+        run: npm run validate:config
+      - name: Smoke tests
+        run: npm run test:smoke -- --project=chromium
+      - name: Sanity tests
+        run: npm run test:sanity -- --project=chromium
+      - name: E2E journeys
+        run: npm run test:e2e -- --project=chromium
+      - name: Publish job summary
+        if: always()
+        run: |
+          echo "## Chromium critical-path validation" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Smoke, sanity, and E2E commands are executed as separate gates." >> "$GITHUB_STEP_SUMMARY"
+          echo "- Download the artifact below for HTML reports, traces, screenshots, and videos." >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload Playwright evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-artifacts
+          name: playwright-critical-path-${{ github.run_id }}
           path: |
             reports/
             test-results/
