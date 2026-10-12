@@ -151,5 +151,7 @@ Before opening a pull request:
 - [Test strategy](docs/test-strategy.md)
 - [Troubleshooting](docs/troubleshooting.md)
 - [Learning roadmap](docs/learning-roadmap.md)
+- [Learning modules — step-by-step curriculum](docs/learning-modules.md)
+- [End-to-end testing guide](docs/e2e-testing.md)
 - [BDD guide](bdd/README.md)
 - [API guide](api/README.md)
