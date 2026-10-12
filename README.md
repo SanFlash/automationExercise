@@ -1,5 +1,9 @@
 # Automation Exercise — Complete Playwright Automation Engineering Guide
 
+> **Created and maintained by Satyendra Kumar Namdeo**  
+> Original project author: **Satyendra Kumar Namdeo** · GitHub: [@SanFlash](https://github.com/SanFlash)  
+> Copyright © 2026 Satyendra Kumar Namdeo. All rights reserved unless otherwise stated. See [PROJECT-ATTRIBUTION.md](PROJECT-ATTRIBUTION.md) for attribution and usage terms.
+
 > **Purpose:** this repository is both a JavaScript automation framework and a structured training course. It teaches how a maintainable browser-automation project is designed, implemented, executed, debugged, reported, and delivered through CI/CD. Read the guide in order, open the referenced source files, run the examples, and complete the exercises.
 
 **Target application:** [Automation Exercise](https://www.automationexercise.com/) — a public e-commerce practice site.  
