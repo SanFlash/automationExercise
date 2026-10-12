@@ -1,0 +1,41 @@
+name: Scheduled regression
+
+on:
+  schedule:
+    - cron: '30 2 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps
+      - run: npm run lint
+      - run: npm run test:regression
+      - run: npm run test:api
+      - name: Add run summary
+        if: always()
+        run: |
+          echo "## Automation Exercise regression" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Review test status above." >> "$GITHUB_STEP_SUMMARY"
+          echo "- Download the report artifact for traces and screenshots." >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload regression artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-artifacts
+          path: |
+            reports/
+            test-results/
+          if-no-files-found: warn
+          retention-days: 14
