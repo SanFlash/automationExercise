@@ -1,0 +1,41 @@
+name: API contract tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: api-tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm install
+      - name: Validate API configuration
+        run: npm run validate:config
+      - name: Run documented API contract checks
+        run: npm run test:api -- --project=chromium
+      - name: Upload API report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-contract-${{ github.run_id }}
+          path: |
+            reports/
+            test-results/
+          if-no-files-found: warn
+          retention-days: 14
