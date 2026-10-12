@@ -1,0 +1,94 @@
+name: Scheduled cross-browser regression
+
+on:
+  schedule:
+    - cron: '30 2 * * 1-5'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: scheduled-regression-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  ui-regression:
+    name: UI regression — ${{ matrix.browser }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm install
+      - name: Install browser
+        run: npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Lint
+        run: npm run lint
+      - name: UI regression
+        run: npm run test:regression -- --project=${{ matrix.browser }}
+      - name: Upload UI evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-${{ matrix.browser }}-${{ github.run_id }}
+          path: |
+            reports/
+            test-results/
+          if-no-files-found: warn
+          retention-days: 14
+
+  api-contract:
+    name: API contract checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm install
+      - run: npm run test:api -- --project=chromium
+      - name: Upload API evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-regression-${{ github.run_id }}
+          path: |
+            reports/
+            test-results/
+          if-no-files-found: warn
+          retention-days: 14
+
+  bdd-regression:
+    name: Cucumber BDD regression
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm install
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:bdd
+      - name: Upload BDD evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bdd-regression-${{ github.run_id }}
+          path: |
+            reports/cucumber-results.json
+            test-results/bdd/
+          if-no-files-found: warn
+          retention-days: 14
