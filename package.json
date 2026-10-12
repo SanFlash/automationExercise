@@ -2,7 +2,7 @@
   "name": "automation-exercise-playwright",
   "version": "1.0.0",
   "private": true,
-  "description": "JavaScript Playwright automation framework for Automation Exercise",
+  "description": "Playwright JavaScript automation engineering framework for Automation Exercise — created and maintained by Satyendra Kumar Namdeo",
   "type": "module",
   "engines": {
     "node": ">=20"
@@ -41,5 +41,12 @@
     "eslint": "9.22.0",
     "globals": "16.0.0",
     "prettier": "3.5.3"
-  }
+  },
+  "author": "Satyendra Kumar Namdeo",
+  "contributors": [
+    {
+      "name": "Satyendra Kumar Namdeo",
+      "url": "https://github.com/SanFlash"
+    }
+  ]
 }
