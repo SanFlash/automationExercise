@@ -10,6 +10,18 @@
 **Stack:** JavaScript ES modules, Playwright Test, Cucumber.js/Gherkin, ESLint, Prettier, Faker, GitHub Actions.  
 **Repository:** [SanFlash/automationExercise](https://github.com/SanFlash/automationExercise).
 
+
+## Animated execution dashboard and CI report links
+
+The GitHub Actions workflow runs the configured UI regression suite, API contract tests, and Cucumber BDD suite. It generates an interactive, GSAP-animated HTML dashboard with test counts, pass rate, duration, retry indicators, searchable test results, source paths, and failure messages. The report includes creator attribution for **Satyendra Kumar Namdeo**.
+
+- **After each run:** open the workflow run and download the `animated-playwright-report` artifact. The workflow summary contains a clickable link to the run and report artifact location.
+- **Main-branch push:** the workflow also attempts to publish the latest dashboard through GitHub Pages at `https://sanflash.github.io/automationExercise/`. GitHub Pages must be enabled for the repository with **GitHub Actions** as the build/deployment source. If Pages is not enabled or deployment permissions are unavailable, use the downloadable workflow artifact instead.
+- **Local generation:** after running Playwright, execute `npm run report:dashboard`; the dashboard is written to `reports/dashboard/index.html`. Open that HTML file in a browser. GSAP animation is loaded from a CDN, so animation requires network access; the report data and dashboard remain useful without GSAP.
+- **Evidence:** screenshots, videos, traces, Playwright HTML reports, JSON/JUnit results are attached to the workflow artifact when generated. Evidence files may contain test data; do not use real credentials or sensitive production data.
+
+The report cannot automatically launch a browser on your personal computer from a GitHub-hosted runner. Instead, the workflow publishes clickable links in the Actions summary and, when configured, deploys a hosted dashboard URL.
+
 ## Project status and honest coverage statement
 
 This is an actively developed training framework. It includes smoke, sanity, UI regression, API contract, E2E, Cucumber BDD, multi-browser configuration, report/evidence capture, and CI workflow definitions. The automated tests exercise only the scenarios that exist in the repository; a page object or README entry alone is not proof that a business flow has been tested. Check [GitHub Actions](https://github.com/SanFlash/automationExercise/actions) for the latest result for a particular commit.
