@@ -31,7 +31,8 @@
     "test:sanity": "playwright test tests/sanity",
     "test:cross-browser": "playwright test --project=chromium --project=firefox --project=webkit",
     "test:responsive": "playwright test --project=mobile-chromium",
-    "test:full": "npm run validate:config && npm run lint && npm run format:check && npm test && npm run test:bdd"
+    "test:full": "npm run validate:config && npm run lint && npm run format:check && npm test && npm run test:bdd",
+    "report:dashboard": "node scripts/generate-animated-report.js"
   },
   "devDependencies": {
     "@cucumber/cucumber": "11.3.0",
