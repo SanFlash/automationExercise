@@ -22,6 +22,7 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run validate:config
       - run: npm run lint
+      - run: npm run format
       - run: npm run format:check
       - run: npm run test:smoke -- --project=chromium
       - name: Upload test artifacts
