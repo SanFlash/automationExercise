@@ -1,0 +1,37 @@
+{
+  "name": "automation-exercise-playwright",
+  "version": "1.0.0",
+  "private": true,
+  "description": "JavaScript Playwright automation framework for Automation Exercise",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "test": "playwright test",
+    "test:smoke": "playwright test tests/smoke",
+    "test:regression": "playwright test tests/regression tests/navigation tests/products tests/cart tests/contact tests/subscription",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "test:chromium": "playwright test --project=chromium",
+    "test:firefox": "playwright test --project=firefox",
+    "test:webkit": "playwright test --project=webkit",
+    "test:api": "playwright test tests/api",
+    "test:bdd": "cucumber-js --config bdd/cucumber.js",
+    "test:bdd:smoke": "cucumber-js --config bdd/cucumber.js --tags '@smoke'",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "report": "playwright show-report reports/html",
+    "clean:reports": "node scripts/clean-reports.js",
+    "validate:config": "node scripts/validate-config.js"
+  },
+  "devDependencies": {
+    "@cucumber/cucumber": "11.3.0",
+    "@faker-js/faker": "9.6.0",
+    "@playwright/test": "1.51.1",
+    "dotenv": "16.4.7",
+    "eslint": "9.22.0",
+    "globals": "16.0.0",
+    "prettier": "3.5.3"
+  }
+}
