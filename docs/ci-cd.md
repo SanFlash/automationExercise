@@ -8,6 +8,7 @@
 | `api-tests.yml` | Pull request, push to `main`, manual | Documented API response/status checks | Playwright report artifacts |
 | `bdd-tests.yml` | Pull request, manual | Cucumber features and step definitions | Cucumber JSON and failure screenshots |
 | `scheduled-regression.yml` | Weekday schedule, manual | UI regression in Chromium/Firefox/WebKit plus API and BDD | Browser-specific reports and evidence |
+| `manual-suite.yml` | Manual dispatch with suite/browser inputs | Targeted smoke, sanity, regression, E2E, API, BDD, or combined run | Run-specific reports and evidence |
 
 ## Pull request lifecycle
 
@@ -19,6 +20,10 @@
 6. API and BDD workflows execute independently.
 7. Artifacts are uploaded even when a test step fails.
 8. The reviewer inspects the exact commit, workflow conclusion, and evidence before merging.
+
+## Manual suite runner
+
+Use Actions → Manual test suite runner → Run workflow. Choose the suite and browser; optionally supply a UI base URL. The workflow uploads artifacts even if the selected suite fails. Use only an environment you are authorized to test. The `full` option combines selected-browser UI suites with API and BDD runs.
 
 ## Scheduled regression
 
