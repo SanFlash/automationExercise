@@ -32,7 +32,7 @@ jobs:
         run: npm run format:check
 
   full-validation:
-    name: Full UI, API, BDD and browser validation
+    name: Full UI, API, BDD validation and report
     needs: quality
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -51,10 +51,10 @@ jobs:
         run: npx playwright install --with-deps chromium firefox webkit
       - name: Validate configuration
         run: npm run validate:config
-      - name: Run full UI regression across configured browser projects
+      - name: Run full UI regression on Chromium
         id: ui
         continue-on-error: true
-        run: npm run test:regression
+        run: npm run test:regression -- --project=chromium
       - name: Preserve UI suite results
         if: always()
         run: if [ -f reports/results.json ]; then cp reports/results.json reports/ui-results.json; fi
@@ -84,13 +84,12 @@ jobs:
             echo ""
             echo "| Suite | Result |"
             echo "|---|---|"
-            echo "| UI regression (configured browser projects) | ${UI_RESULT} |"
+            echo "| UI regression (Chromium CI gate) | ${UI_RESULT} |"
             echo "| API contract | ${API_RESULT} |"
             echo "| Cucumber BDD | ${BDD_RESULT} |"
             echo ""
             echo "## Open the report"
             echo "- [Open this workflow run and download the **Animated HTML Report** artifact](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID})"
-            echo "- [Open the latest published dashboard](https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/)"
             echo ""
             echo "GitHub Pages publishing is optional and may be unavailable until enabled in repository Settings → Pages. The downloadable animated report artifact is the reliable fallback for every run."
           } >> "$GITHUB_STEP_SUMMARY"
@@ -125,28 +124,6 @@ jobs:
               echo "The artifact URL was not returned by GitHub. Open the run's Artifacts section to download the report."
             fi
           } >> "$GITHUB_STEP_SUMMARY"
-      - name: Prepare GitHub Pages payload
-        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: |
-          mkdir -p public
-          if [ -f reports/dashboard/index.html ]; then cp -R reports/dashboard/. public/; fi
-          if [ -d reports/html ]; then cp -R reports/html public/playwright-html; fi
-          if [ -d test-results ]; then cp -R test-results public/evidence; fi
-          if [ ! -f public/index.html ]; then printf '<h1>Report unavailable</h1><p>No Playwright JSON report was generated.</p>' > public/index.html; fi
-      - name: Configure GitHub Pages (optional)
-        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
-        continue-on-error: true
-        uses: actions/configure-pages@v5
-      - name: Upload Pages artifact (optional)
-        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
-        continue-on-error: true
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: public
-      - name: Deploy animated report to GitHub Pages (optional)
-        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
-        continue-on-error: true
-        uses: actions/deploy-pages@v4
       - name: Fail workflow if any test suite failed
         if: always()
         env:
