@@ -280,7 +280,7 @@ import { test, expect } from '../../fixtures/base.fixture.js';
 test('NAV-001 primary navigation reaches Products', async ({ navigationBar, page }) => {
   await page.goto('/');
   await navigationBar.open('Products');
-  await expect(page).toHaveURL(/\\/products/);
+  await expect(page).toHaveURL(/\/products/);
   await expect(page.getByRole('heading', { name: 'All Products', exact: true })).toBeVisible();
 });
 ```
@@ -480,6 +480,10 @@ Workflows live in `.github/workflows/`.
 ### BDD workflow
 
 `bdd-tests.yml` runs Cucumber features and uploads the configured Cucumber evidence.
+
+### Manual suite runner
+
+`manual-suite.yml` supports a manual dispatch with suite and browser choices, plus an optional UI base URL. It is useful for targeted verification without editing workflow YAML. Only run against environments you are authorized to test.
 
 ### Scheduled/manual regression
 
