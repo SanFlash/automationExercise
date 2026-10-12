@@ -1,4 +1,4 @@
-name: Playwright quality and UI validation
+name: Playwright quality, full validation and animated report
 
 on:
   pull_request:
@@ -23,54 +23,109 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-      - name: Install dependencies
-        run: npm install
-      - name: Validate configuration
-        run: npm run validate:config
-      - name: ESLint
-        run: npm run lint
-      - name: Apply canonical formatting
-        run: npm run format
-      - name: Verify formatting
-        run: npm run format:check
+      - run: npm install
+      - run: npm run validate:config
+      - run: npm run lint
+      - run: npm run format:check
 
-  chromium-critical-path:
+  full-validation:
+    name: Full UI, API, BDD and browser validation
     needs: quality
-    name: Chromium smoke, sanity and E2E
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 90
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
       - name: Install dependencies
         run: npm install
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
+      - name: Install all Playwright browsers
+        run: npx playwright install --with-deps chromium firefox webkit
       - name: Validate configuration
         run: npm run validate:config
-      - name: Smoke tests
-        run: npm run test:smoke -- --project=chromium
-      - name: Sanity tests
-        run: npm run test:sanity -- --project=chromium
-      - name: E2E journeys
-        run: npm run test:e2e -- --project=chromium
-      - name: Publish job summary
+      - name: Run full UI regression across configured browser projects
+        id: ui
+        continue-on-error: true
+        run: npm run test:regression
+      - name: Run API contract suite
+        id: api
+        continue-on-error: true
+        run: npm run test:api -- --project=chromium
+      - name: Run Cucumber BDD suite
+        id: bdd
+        continue-on-error: true
+        run: npm run test:bdd
+      - name: Generate animated report dashboard
         if: always()
+        run: node scripts/generate-animated-report.js
+      - name: Publish clickable report links in Actions summary
+        if: always()
+        env:
+          UI_RESULT: ${{ steps.ui.outcome }}
+          API_RESULT: ${{ steps.api.outcome }}
+          BDD_RESULT: ${{ steps.bdd.outcome }}
         run: |
-          echo "## Chromium critical-path validation" >> "$GITHUB_STEP_SUMMARY"
-          echo "- Smoke, sanity, and E2E commands are executed as separate gates." >> "$GITHUB_STEP_SUMMARY"
-          echo "- Download the artifact below for HTML reports, traces, screenshots, and videos." >> "$GITHUB_STEP_SUMMARY"
-      - name: Upload Playwright evidence
+          {
+            echo "# ◈ Sentinel QA — Full Validation Report"
+            echo ""
+            echo "| Suite | Result |"
+            echo "|---|---|"
+            echo "| UI regression (configured browser projects) | ${UI_RESULT} |"
+            echo "| API contract | ${API_RESULT} |"
+            echo "| Cucumber BDD | ${BDD_RESULT} |"
+            echo ""
+            echo "## Open the report"
+            echo "- [Open this workflow run and download the **Animated HTML Report** artifact](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID})"
+            echo "- [Open the latest published dashboard](https://${GITHUB_REPOSITORY_OWNER}.github.io/${GITHUB_REPOSITORY#*/}/)"
+            echo ""
+            echo "The dashboard is published on main-branch pushes when GitHub Pages is enabled for this repository. Pull requests can download the run artifact."
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload animated dashboard and test evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-critical-path-${{ github.run_id }}
+          name: animated-playwright-report-${{ github.run_id }}
           path: |
-            reports/
+            reports/dashboard/
+            reports/html/
+            reports/results.json
+            reports/junit.xml
+            reports/cucumber-results.json
             test-results/
           if-no-files-found: warn
-          retention-days: 14
+          retention-days: 30
+      - name: Prepare GitHub Pages payload
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          mkdir -p public
+          if [ -f reports/dashboard/index.html ]; then cp -R reports/dashboard/. public/; fi
+          if [ -d reports/html ]; then cp -R reports/html public/playwright-html; fi
+          if [ -d test-results ]; then cp -R test-results public/evidence; fi
+          if [ ! -f public/index.html ]; then printf '<h1>Report unavailable</h1><p>No Playwright JSON report was generated.</p>' > public/index.html; fi
+      - name: Configure GitHub Pages
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/configure-pages@v5
+      - name: Upload Pages artifact
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+      - name: Deploy animated report to GitHub Pages
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/deploy-pages@v4
+      - name: Fail workflow if any test suite failed
+        if: always()
+        env:
+          UI_RESULT: ${{ steps.ui.outcome }}
+          API_RESULT: ${{ steps.api.outcome }}
+          BDD_RESULT: ${{ steps.bdd.outcome }}
+        run: |
+          if [ "$UI_RESULT" != "success" ] || [ "$API_RESULT" != "success" ] || [ "$BDD_RESULT" != "success" ]; then
+            echo "One or more suites failed. Inspect the report and evidence artifacts."
+            exit 1
+          fi
