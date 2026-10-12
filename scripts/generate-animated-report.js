@@ -3,12 +3,16 @@ import path from 'node:path';
 
 const root = process.cwd();
 const outputDir = path.join(root, 'reports', 'dashboard');
-const jsonPath = path.join(root, 'reports', 'results.json');
+const jsonPaths = ['ui-results.json', 'api-results.json', 'results.json'].map(name => path.join(root, 'reports', name));
 const templatePath = path.join(root, 'reports', 'dashboard-template.html');
 let report = { suites: [], stats: { expected: 0, unexpected: 0, skipped: 0, flaky: 0, duration: 0 } };
 
 try {
-  const raw = JSON.parse(await fs.readFile(jsonPath, 'utf8'));
+  const rawReports = [];
+  for (const file of jsonPaths) {
+    try { rawReports.push(JSON.parse(await fs.readFile(file, 'utf8'))); } catch { /* This suite may not have run. */ }
+  }
+  if (!rawReports.length) throw new Error('No Playwright JSON result files found');
   const walk = (suite, parent = '') => {
     const title = [parent, suite.title].filter(Boolean).join(' › ');
     for (const spec of suite.specs ?? []) {
@@ -25,7 +29,7 @@ try {
     }
     for (const child of suite.suites ?? []) walk(child, title);
   };
-  for (const suite of raw.suites ?? []) walk(suite);
+  for (const raw of rawReports) for (const suite of raw.suites ?? []) walk(suite);
 } catch (error) {
   report.error = 'Playwright JSON results were not found or could not be parsed.';
   report.detail = String(error);
