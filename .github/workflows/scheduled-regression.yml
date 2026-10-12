@@ -38,6 +38,15 @@ jobs:
       - name: Generate animated report
         if: always()
         run: node scripts/generate-animated-report.js
+      - name: Add report links to workflow summary
+        if: always()
+        run: |
+          {
+            echo "## Nightly regression report"
+            echo "- [Open this run and download its report/evidence artifacts]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID)"
+            echo "- UI browser matrix: Chromium, Firefox, WebKit"
+            echo "- API contract and Cucumber BDD results are uploaded as separate artifacts."
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Upload UI evidence and animated report
         if: always()
         uses: actions/upload-artifact@v4
@@ -46,8 +55,6 @@ jobs:
           path: |
             reports/
             test-results/
-          if-no-files-found: warn
-          retention-days: 14
           if-no-files-found: warn
           retention-days: 14
 
@@ -99,6 +106,7 @@ jobs:
         with:
           name: bdd-regression-${{ github.run_id }}
           path: |
+            reports/dashboard/
             reports/cucumber-results.json
             test-results/bdd/
           if-no-files-found: warn
