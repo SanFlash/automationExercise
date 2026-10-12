@@ -36,6 +36,7 @@ jobs:
         run: npm run format:check
 
   chromium-critical-path:
+    needs: quality
     name: Chromium smoke, sanity and E2E
     runs-on: ubuntu-latest
     timeout-minutes: 35
