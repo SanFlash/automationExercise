@@ -96,6 +96,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
       - name: Upload animated dashboard and test evidence
         if: always()
+        id: report-artifact
         uses: actions/upload-artifact@v4
         with:
           name: animated-playwright-report-${{ github.run_id }}
@@ -110,6 +111,20 @@ jobs:
             test-results/
           if-no-files-found: warn
           retention-days: 30
+      - name: Add direct artifact link to workflow summary
+        if: always()
+        env:
+          ARTIFACT_URL: ${{ steps.report-artifact.outputs.artifact-url }}
+        run: |
+          {
+            echo ""
+            echo "## Direct report download"
+            if [ -n "$ARTIFACT_URL" ]; then
+              echo "[**Download/open the Animated Playwright Report artifact**]($ARTIFACT_URL)"
+            else
+              echo "The artifact URL was not returned by GitHub. Open the run's Artifacts section to download the report."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
       - name: Prepare GitHub Pages payload
         if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
